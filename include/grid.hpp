@@ -71,7 +71,12 @@ public:
   {
     for (int row = 0; row < rows_; row++) {
       for (int col = 0; col < cols_; col++) {
-        std::cout << " " << grid_.at(row).at(col);
+        int current = grid_.at(row).at(col);
+        if (current == 1) {
+          std::cout << " \033[31m" << grid_.at(row).at(col) << "\033[0m";
+        } else {
+          std::cout << " \033[32m" << grid_.at(row).at(col) << "\033[0m";
+        }
       }
       std::cout << std::endl;
     }
