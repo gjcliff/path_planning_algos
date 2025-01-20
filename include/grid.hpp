@@ -1,16 +1,16 @@
 #include <algorithm>
 #include <iostream>
-#include <unordered_set>
 #include <random>
+#include <unordered_set>
 #include <vector>
 
 struct pairhash {
-  public:
-    template <typename T, typename U>
-      std::size_t operator()(const std::pair<T, U> &x) const
-      {
-        return std::hash<T>()(x.first) ^ std::hash<U>()(x.second);
-      }
+public:
+  template <typename T, typename U>
+  std::size_t operator()(const std::pair<T, U> &x) const
+  {
+    return std::hash<T>()(x.first) ^ std::hash<U>()(x.second);
+  }
 };
 
 class Grid {
@@ -23,7 +23,7 @@ public:
   // \brief Use Prim's algorithm to initialize the maze
   void initialize()
   {
-    std::unordered_set<std::pair<int,int>, pairhash> visited;
+    std::unordered_set<std::pair<int, int>, pairhash> visited;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> u1(0, rows_ - 1); // [0, max]
@@ -36,7 +36,7 @@ public:
 
     std::vector<std::pair<int, int>> frontier;
     std::vector<std::pair<int, int>> directions{
-      {0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+      {0, 2}, {2, 0}, {0, -2}, {-2, 0}};
 
     // do while loop so that it always runs at least once
     do {
@@ -47,6 +47,7 @@ public:
             candidate.second >= 0 && candidate.second < cols_ &&
             grid_.at(candidate.first).at(candidate.second) == 0 &&
             visited.find(candidate) == visited.end()) {
+          // grid_.at(candidate.first).at(candidate.second) = 1;
           frontier.push_back(candidate);
           visited.insert(candidate);
         }
@@ -54,10 +55,15 @@ public:
 
       rand_frontier = std::uniform_int_distribution<>(0, frontier.size() - 1);
       int index = rand_frontier(gen);
+      std::pair<int, int> diff = {
+        (frontier.at(index).first + current.first) / 2,
+        (frontier.at(index).second + current.second) / 2};
       current = frontier.at(index);
       frontier.erase(std::remove(frontier.begin(), frontier.end(), current),
                      frontier.end());
       grid_.at(current.first).at(current.second) = 1;
+      grid_.at(diff.first).at(diff.second) = 1;
+      // frontier = {};
     } while (!frontier.empty());
   }
 
