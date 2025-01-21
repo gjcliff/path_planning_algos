@@ -18,7 +18,7 @@ class Grid {
 public:
   Grid(int rows, int cols) : rows_(rows), cols_(cols)
   {
-    grid_ = std::vector<std::vector<int>>(rows_, std::vector<int>(cols_, 0));
+    grid = std::vector<std::vector<int>>(rows_, std::vector<int>(cols_, 0));
   }
 
   // \brief Use Prim's algorithm to initialize the maze
@@ -33,7 +33,7 @@ public:
     int start_row = u1(gen);
     int start_col = u2(gen);
     std::pair<int, int> current(start_row, start_col);
-    grid_.at(start_row).at(start_col) = 1;
+    grid.at(start_row).at(start_col) = 1;
 
     std::vector<std::pair<int, int>> frontiers;
     std::vector<std::pair<int, int>> walls;
@@ -47,9 +47,9 @@ public:
                                       current.second + dir.second);
         if (candidate.first >= 0 && candidate.first < rows_ &&
             candidate.second >= 0 && candidate.second < cols_ &&
-            grid_.at(candidate.first).at(candidate.second) == 0 &&
+            grid.at(candidate.first).at(candidate.second) == 0 &&
             visited.find(candidate) == visited.end()) {
-          // grid_.at(candidate.first).at(candidate.second) = 1;
+          // grid.at(candidate.first).at(candidate.second) = 1;
           frontiers.push_back(candidate);
           visited.insert(candidate);
         }
@@ -79,8 +79,8 @@ public:
       current = frontiers.at(index);
       frontiers.erase(std::remove(frontiers.begin(), frontiers.end(), current),
                       frontiers.end());
-      grid_.at(current.first).at(current.second) = 1;
-      grid_.at(diff.first).at(diff.second) = 1;
+      grid.at(current.first).at(current.second) = 1;
+      grid.at(diff.first).at(diff.second) = 1;
     } while (!frontiers.empty());
   }
 
@@ -95,18 +95,19 @@ public:
   {
     for (int row = 0; row < rows_; row++) {
       for (int col = 0; col < cols_; col++) {
-        int current = grid_.at(row).at(col);
+        int current = grid.at(row).at(col);
         if (current == 1) {
-          std::cout << " \033[31m" << grid_.at(row).at(col) << "\033[0m";
+          std::cout << " \033[31m" << grid.at(row).at(col) << "\033[0m";
         } else {
-          std::cout << " \033[32m" << grid_.at(row).at(col) << "\033[0m";
+          std::cout << " \033[32m" << grid.at(row).at(col) << "\033[0m";
         }
       }
       std::cout << std::endl;
     }
   }
 
+  std::vector<std::vector<int>> grid;
+
 private:
   int rows_, cols_;
-  std::vector<std::vector<int>> grid_;
 };

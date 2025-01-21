@@ -1,8 +1,7 @@
 #include <cmath>
 #include <memory>
 #include <vector>
-
-using Grid = std::vector<std::vector<int>>;
+#include "grid.hpp"
 
 struct Node {
   Node(int x, int y, float g = 0, float h = 0,
