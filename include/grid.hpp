@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <limits>
 #include <random>
 #include <unordered_set>
 #include <vector>
@@ -34,7 +35,8 @@ public:
     std::pair<int, int> current(start_row, start_col);
     grid_.at(start_row).at(start_col) = 1;
 
-    std::vector<std::pair<int, int>> frontier;
+    std::vector<std::pair<int, int>> frontiers;
+    std::vector<std::pair<int, int>> walls;
     std::vector<std::pair<int, int>> directions{
       {0, 2}, {2, 0}, {0, -2}, {-2, 0}};
 
@@ -48,28 +50,44 @@ public:
             grid_.at(candidate.first).at(candidate.second) == 0 &&
             visited.find(candidate) == visited.end()) {
           // grid_.at(candidate.first).at(candidate.second) = 1;
-          frontier.push_back(candidate);
+          frontiers.push_back(candidate);
           visited.insert(candidate);
         }
       }
 
-      rand_frontier = std::uniform_int_distribution<>(0, frontier.size() - 1);
+      rand_frontier = std::uniform_int_distribution<>(0, frontiers.size() - 1);
       int index;
+      int min_dist;
       int retries = 5;
       std::pair<int, int> diff;
       do {
         index = rand_frontier(gen);
-        diff = {(frontier.at(index).first + current.first) / 2,
-                (frontier.at(index).second + current.second) / 2};
+        min_dist = std::numeric_limits<int>::max();
+        for (const auto &wall : walls) {
+          int dist = manhattan_distance(wall, frontiers.at(index));
+          if (dist < min_dist) {
+            min_dist = dist;
+            current = wall;
+          }
+        }
+        diff = {(frontiers.at(index).first + current.first) / 2,
+                (frontiers.at(index).second + current.second) / 2};
         retries--;
-      } while ((diff.first != current.first && diff.second != current.second) && retries > 0);
-      current = frontier.at(index);
-      frontier.erase(std::remove(frontier.begin(), frontier.end(), current),
-                     frontier.end());
+      } while ((diff.first != current.first && diff.second != current.second) &&
+               manhattan_distance(current, frontiers.at(index)) != 2 &&
+               retries > 0);
+      current = frontiers.at(index);
+      frontiers.erase(std::remove(frontiers.begin(), frontiers.end(), current),
+                      frontiers.end());
       grid_.at(current.first).at(current.second) = 1;
       grid_.at(diff.first).at(diff.second) = 1;
-      // frontier = {};
-    } while (!frontier.empty());
+    } while (!frontiers.empty());
+  }
+
+  int manhattan_distance(std::pair<int, int> first, std::pair<int, int> second)
+  {
+    return std::abs(first.first - second.first) +
+           std::abs(first.second - second.second);
   }
 
   // \brief Print the maze with pretty colors
