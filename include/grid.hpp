@@ -54,10 +54,15 @@ public:
       }
 
       rand_frontier = std::uniform_int_distribution<>(0, frontier.size() - 1);
-      int index = rand_frontier(gen);
-      std::pair<int, int> diff = {
-        (frontier.at(index).first + current.first) / 2,
-        (frontier.at(index).second + current.second) / 2};
+      int index;
+      int retries = 5;
+      std::pair<int, int> diff;
+      do {
+        index = rand_frontier(gen);
+        diff = {(frontier.at(index).first + current.first) / 2,
+                (frontier.at(index).second + current.second) / 2};
+        retries--;
+      } while ((diff.first != current.first && diff.second != current.second) && retries > 0);
       current = frontier.at(index);
       frontier.erase(std::remove(frontier.begin(), frontier.end(), current),
                      frontier.end());
@@ -67,6 +72,7 @@ public:
     } while (!frontier.empty());
   }
 
+  // \brief Print the maze with pretty colors
   void print()
   {
     for (int row = 0; row < rows_; row++) {
