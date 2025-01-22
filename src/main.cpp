@@ -1,4 +1,5 @@
 #include "grid.hpp"
+#include "dijkstra.hpp"
 
 int main(int argc, char *argv[]) {
   int w, h;
@@ -15,6 +16,9 @@ int main(int argc, char *argv[]) {
   Grid grid(w, h);
   grid.initialize();
   grid.print();
+
+  Dijkstra dijkstra(std::make_shared<Grid>(grid));
+  dijkstra.run();
 
   return 0;
 }
