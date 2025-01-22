@@ -35,6 +35,7 @@ public:
 
   Grid &run()
   {
+    std::cout << "Running Depth First Search" << std::endl;
     std::vector<std::pair<int, int>> directions{
       {0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
@@ -56,7 +57,6 @@ public:
       visited.insert(current->coord);
 
       if (current->coord == goal_pos) {
-        std::cout << "Running Depth First Search" << std::endl;
         std::cout << "Shortest path distance: " << current->dist << std::endl;
 
         while (current->prev != nullptr) {
