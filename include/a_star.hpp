@@ -45,6 +45,7 @@ public:
 
   void run(heuristic strat)
   {
+    std::cout << "Running A*" << std::endl;
     Grid distances(grid_->rows, grid_->cols, std::numeric_limits<int>::max());
     distances.grid.at(start_pos.first).at(start_pos.second) = 0;
 
@@ -92,9 +93,13 @@ public:
             neighbor.second >= 0 && neighbor.second < grid_->cols &&
             grid_->grid.at(neighbor.first).at(neighbor.second) == 0) {
           int g = current.g + 1;
-          int h = manhattan_distance(neighbor, goal_pos);
+          int h;
+          if (strat == heuristic::MANHATTAN) {
+            h = manhattan_distance(neighbor, goal_pos);
+          } else if (strat == heuristic::EUCLIDEAN) {
+            h = euclidean_distance(neighbor, goal_pos);
+          }
           int f = g + h;
-
           if (f < distances.grid.at(neighbor.first).at(neighbor.second)) {
             distances.grid.at(neighbor.first).at(neighbor.second) = f;
             queue.push({g, f, neighbor});

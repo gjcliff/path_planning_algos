@@ -26,12 +26,13 @@ public:
     } while (grid_->grid.at(start_pos.first).at(start_pos.second) == 1);
     do {
       goal_pos = {row(gen), col(gen)};
-    } while (grid_->grid.at(goal_pos.first).at(goal_pos.second) == 1 &&
+    } while (grid_->grid.at(goal_pos.first).at(goal_pos.second) == 1 ||
              goal_pos == start_pos);
   }
 
   void run()
   {
+    std::cout << "Running Dijkstra's Algorithm" << std::endl;
     Grid distances(grid_->rows, grid_->cols, std::numeric_limits<int>::max());
     distances.grid.at(start_pos.first).at(start_pos.second) = 0;
 
