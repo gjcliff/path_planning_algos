@@ -2,10 +2,10 @@
 
 #include "grid.hpp"
 #include <memory>
-#include <queue>
+#include <stack>
 #include <unordered_set>
 
-struct breadth_hash {
+struct depth_hash {
 public:
   template <typename T, typename U>
   int operator()(const std::pair<T, U> &x) const
@@ -14,19 +14,19 @@ public:
   }
 };
 
-struct Breadth_Node {
-  Breadth_Node(int dist, std::pair<int, int> coord, std::shared_ptr<Breadth_Node> prev)
+struct Depth_Node {
+  Depth_Node(int dist, std::pair<int, int> coord, std::shared_ptr<Depth_Node> prev)
     : dist(dist), coord(coord), prev(prev)
   {
   }
   int dist;
   std::pair<int, int> coord;
-  std::shared_ptr<Breadth_Node> prev;
+  std::shared_ptr<Depth_Node> prev;
 };
 
-class Breadth_First {
+class Depth_First {
 public:
-  Breadth_First(std::shared_ptr<Grid> grid) : grid_(grid), rd(), gen(rd())
+  Depth_First(std::shared_ptr<Grid> grid) : grid_(grid), rd(), gen(rd())
   {
     std::uniform_int_distribution<> row(0, grid_->rows - 1);
     std::uniform_int_distribution<> col(0, grid_->cols - 1);
@@ -43,25 +43,25 @@ public:
     std::vector<std::pair<int, int>> directions{
       {0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
-    std::shared_ptr<Breadth_Node> current =
-      std::make_shared<Breadth_Node>(0, start_pos, nullptr);
+    std::shared_ptr<Depth_Node> current =
+      std::make_shared<Depth_Node>(0, start_pos, nullptr);
 
-    std::queue<std::shared_ptr<Breadth_Node>> queue;
-    queue.push(current);
+    std::stack<std::shared_ptr<Depth_Node>> stack;
+    stack.push(current);
 
-    std::unordered_set<std::pair<int, int>, breadth_hash> visited;
+    std::unordered_set<std::pair<int, int>, depth_hash> visited;
 
-    while (!queue.empty()) {
+    while (!stack.empty()) {
       int rows = grid_->rows;
       int cols = grid_->cols;
 
-      current = queue.front();
-      queue.pop();
+      current = stack.top();
+      stack.pop();
 
       visited.insert(current->coord);
 
       if (current->coord == goal_pos) {
-        std::cout << "Running Breadth First Search" << std::endl;
+        std::cout << "Running Depth First Search" << std::endl;
         std::cout << "Shortest path distance: " << current->dist << std::endl;
 
         while (current->prev != nullptr) {
@@ -76,14 +76,14 @@ public:
       for (const auto &dir : directions) {
         std::pair<int, int> next_coord = {current->coord.first + dir.first,
                                           current->coord.second + dir.second};
-        std::shared_ptr<Breadth_Node> next =
-          std::make_shared<Breadth_Node>(current->dist + 1, next_coord, current);
+        std::shared_ptr<Depth_Node> next =
+          std::make_shared<Depth_Node>(current->dist + 1, next_coord, current);
 
         if (next->coord.first >= 0 && next->coord.first < rows &&
             next->coord.second >= 0 && next->coord.second < cols &&
             visited.find(next->coord) == visited.end()) {
           if (grid_->grid.at(next->coord.first).at(next->coord.second) != 1) {
-            queue.push(next);
+            stack.push(next);
           }
         }
       }

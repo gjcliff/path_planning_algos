@@ -2,6 +2,7 @@
 #include "dijkstra.hpp"
 #include "grid.hpp"
 #include "breadth_first.hpp"
+#include "depth_first.hpp"
 
 void print_help()
 {
@@ -57,6 +58,11 @@ int main(int argc, char *argv[])
   grid->reset();
   Breadth_First breadth_first(grid);
   breadth_first.run();
+  grid->print();
+
+  grid->reset();
+  Depth_First depth_first(grid);
+  depth_first.run();
   grid->print();
 
   return 0;
