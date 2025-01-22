@@ -7,8 +7,10 @@
 #include <random>
 #include <unordered_map>
 
-struct Node {
-  Node(int dist, std::pair<int, int> coord) : dist(dist), coord(coord) {}
+struct Dijkstra_Node {
+  Dijkstra_Node(int dist, std::pair<int, int> coord) : dist(dist), coord(coord)
+  {
+  }
   int dist;
   std::pair<int, int> coord;
 };
@@ -24,7 +26,8 @@ public:
     } while (grid_->grid.at(start_pos.first).at(start_pos.second) == 1);
     do {
       goal_pos = {row(gen), col(gen)};
-    } while (grid_->grid.at(goal_pos.first).at(goal_pos.second) == 1);
+    } while (grid_->grid.at(goal_pos.first).at(goal_pos.second) == 1 &&
+             goal_pos == start_pos);
   }
 
   void run()
@@ -36,8 +39,11 @@ public:
     // the largest element from the queue. We want the smalled element (shortest
     // distance), so we can pass it a custom comparison function to accomplish
     // that
-    auto cmp = [](const Node a, const Node b) { return a.dist > b.dist; };
-    std::priority_queue<struct Node, std::vector<struct Node>, decltype(cmp)>
+    auto cmp = [](const Dijkstra_Node a, const Dijkstra_Node b) {
+      return a.dist > b.dist;
+    };
+    std::priority_queue<struct Dijkstra_Node, std::vector<struct Dijkstra_Node>,
+                        decltype(cmp)>
       queue(cmp);
 
     queue.push({0, start_pos});
@@ -48,7 +54,7 @@ public:
     std::unordered_map<std::pair<int, int>, std::pair<int, int>, pairhash> map;
 
     while (!queue.empty()) {
-      struct Node current =
+      struct Dijkstra_Node current =
         queue.top(); // grab the first element from the queue
       queue.pop();   // remove the first element from the queue
       if (current.coord == goal_pos) {

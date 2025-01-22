@@ -102,6 +102,12 @@ public:
            std::abs(first.second - second.second);
   }
 
+  void reset(int val = 0)
+  {
+    grid = std::vector<std::vector<int>>(rows, std::vector<int>(cols, val));
+    initialize();
+  }
+
   // \brief Print the maze with pretty colors
   void print()
   {

@@ -1,35 +1,118 @@
-#include <cmath>
-#include <memory>
-#include <vector>
+#pragma once
+
 #include "grid.hpp"
+#include <limits>
+#include <memory>
+#include <queue>
+#include <random>
+#include <unordered_map>
 
-struct Node {
-  Node(int x, int y, float g = 0, float h = 0,
-       std::shared_ptr<Node> parent = nullptr)
-    : x(x), y(y), g(g), h(h), parent(parent)
+struct A_Star_Node {
+  A_Star_Node(int g, int f, std::pair<int, int> coord)
+    : g(g), f(f), coord(coord)
   {
   }
-  bool operator==(const Node &other) const
-  {
-    return x == other.x && y == other.y;
-  }
-  bool operator<(const Node &other) const
-  {
-    return f > other.f; // for use in priority queue (min-heap)
-  }
-
-  int x, y;
-  float g, h, f;
-  std::shared_ptr<Node> parent = nullptr;
+  int g, f;
+  std::pair<int, int> coord;
 };
 
-bool is_valid(int x, int y, std::vector<std::vector<int>> &grid)
-{
-  return x >= 0 && x < grid.size() && y >= 0 && y < grid.at(0).size() &&
-         grid.at(y).at(x) == 0;
-}
+enum heuristic { MANHATTAN, EUCLIDEAN };
 
-float manhattan_distance(const Node &a, const Node &b)
-{
-  return std::abs(a.x - b.x) + std::abs(a.y - b.y);
-}
+class A_Star {
+public:
+  A_Star(std::shared_ptr<Grid> grid) : gen(rd()), grid_(grid)
+  {
+    std::uniform_int_distribution<> row(0, grid_->rows - 1);
+    std::uniform_int_distribution<> col(0, grid_->cols - 1);
+    do {
+      start_pos = {row(gen), col(gen)};
+    } while (grid_->grid.at(start_pos.first).at(start_pos.second) == 1);
+    do {
+      goal_pos = {row(gen), col(gen)};
+    } while (grid_->grid.at(goal_pos.first).at(goal_pos.second) == 1);
+  }
+
+  int manhattan_distance(std::pair<int, int> a, std::pair<int, int> b)
+  {
+    return std::abs(a.first - b.first) + std::abs(a.second - b.second);
+  }
+
+  float euclidean_distance(std::pair<int, int> a, std::pair<int, int> b)
+  {
+    return std::sqrt(std::pow(a.first - b.first, 2) +
+                     std::pow(a.second - b.second, 2));
+  }
+
+  void run(heuristic strat)
+  {
+    Grid distances(grid_->rows, grid_->cols, std::numeric_limits<int>::max());
+    distances.grid.at(start_pos.first).at(start_pos.second) = 0;
+
+    // priority queue is max-heap by default, which means it tries to extract
+    // the largest element from the queue. We want the smalled element (shortest
+    // distance), so we can pass it a custom comparison function to accomplish
+    // that
+    auto cmp = [](const A_Star_Node a, const A_Star_Node b) {
+      return a.f > b.f;
+    };
+    std::priority_queue<A_Star_Node, std::vector<A_Star_Node>, decltype(cmp)>
+      queue(cmp);
+
+    queue.push({0, 0, start_pos});
+
+    std::vector<std::pair<int, int>> directions{
+      {0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
+    std::unordered_map<std::pair<int, int>, std::pair<int, int>, pairhash> map;
+
+    while (!queue.empty()) {
+      struct A_Star_Node current =
+        queue.top(); // grab the first element from the queue
+      queue.pop();   // remove the first element from the queue
+      if (current.coord == goal_pos) {
+        std::cout << "Shortest path distance: " << current.f << std::endl;
+        std::pair<int, int> current = goal_pos;
+        while (map.find(current) != map.end()) {
+          grid_->grid.at(current.first).at(current.second) = 2;
+          current = map[current];
+        }
+        grid_->grid.at(start_pos.first).at(start_pos.second) = 3;
+        grid_->grid.at(goal_pos.first).at(goal_pos.second) = 4;
+        return;
+      }
+
+      int row = current.coord.first;
+      int col = current.coord.second;
+
+      // now we process the neighbors
+      for (const auto &dir : directions) {
+        std::pair<int, int> neighbor = {row + dir.first, col + dir.second};
+        // bounds checking, and also check if the neighbor is not a wall
+        if (neighbor.first >= 0 && neighbor.first < grid_->rows &&
+            neighbor.second >= 0 && neighbor.second < grid_->cols &&
+            grid_->grid.at(neighbor.first).at(neighbor.second) == 0) {
+          int g = current.g + 1;
+          int h = manhattan_distance(neighbor, goal_pos);
+          int f = g + h;
+
+          if (f < distances.grid.at(neighbor.first).at(neighbor.second)) {
+            distances.grid.at(neighbor.first).at(neighbor.second) = f;
+            queue.push({g, f, neighbor});
+            map[neighbor] = current.coord;
+          }
+        }
+      }
+    }
+
+    std::cout << "No path found from start to goal" << std::endl;
+    grid_->grid.at(start_pos.first).at(start_pos.second) = 3;
+    grid_->grid.at(goal_pos.first).at(goal_pos.second) = 4;
+  }
+
+private:
+  std::pair<int, int> start_pos;
+  std::pair<int, int> goal_pos;
+  std::random_device rd;
+  std::mt19937 gen;
+  std::shared_ptr<Grid> grid_;
+};
