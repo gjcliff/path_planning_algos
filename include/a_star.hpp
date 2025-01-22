@@ -1,6 +1,7 @@
 #pragma once
 
 #include "grid.hpp"
+#include <functional>
 #include <limits>
 #include <memory>
 #include <queue>
@@ -53,9 +54,18 @@ public:
     // the largest element from the queue. We want the smalled element (shortest
     // distance), so we can pass it a custom comparison function to accomplish
     // that
-    auto cmp = [](const A_Star_Node a, const A_Star_Node b) {
-      return a.f > b.f;
-    };
+    std::function<bool(const A_Star_Node, const A_Star_Node)> cmp =
+      [](const A_Star_Node a, const A_Star_Node b) { return a.f > b.f; };
+    // something new, decltype. We have to use decltype because the lambda
+    // function is declared with the auto keyword, and decltype tells the
+    // compiler to figure out the type at compile time. Without this you have
+    // to make a struct that overrides the () operator like:
+    // struct Compare {
+    //   bool operator()(const A_Star_Node &a, const A_Star_Node &b) const {
+    //     return a.f > b.f; // for example, you can do anything
+    //   }
+    // }
+    // and then you pass that into the third parameter slot in priority_queue
     std::priority_queue<A_Star_Node, std::vector<A_Star_Node>, decltype(cmp)>
       queue(cmp);
 

@@ -1,6 +1,7 @@
 #include "a_star.hpp"
 #include "dijkstra.hpp"
 #include "grid.hpp"
+#include "breadth_first.hpp"
 
 void print_help()
 {
@@ -51,6 +52,11 @@ int main(int argc, char *argv[])
   grid->reset();
   A_Star a_star(grid);
   a_star.run(algo == "manhattan" ? heuristic::MANHATTAN : heuristic::EUCLIDEAN);
+  grid->print();
+
+  grid->reset();
+  Breadth_First breadth_first(grid);
+  breadth_first.run();
   grid->print();
 
   return 0;
