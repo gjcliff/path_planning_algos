@@ -3,7 +3,6 @@
 #include "grid.hpp"
 #include <functional>
 #include <limits>
-#include <memory>
 #include <queue>
 #include <random>
 #include <unordered_map>
@@ -21,16 +20,10 @@ enum heuristic { MANHATTAN, EUCLIDEAN };
 
 class A_Star {
 public:
-  A_Star(std::shared_ptr<Grid> grid) : gen(rd()), grid_(grid)
+  A_Star(Grid &grid, std::pair<int, int> start_pos,
+         std::pair<int, int> goal_pos)
+    : gen(rd()), grid_(grid), start_pos(start_pos), goal_pos(goal_pos)
   {
-    std::uniform_int_distribution<> row(0, grid_->rows - 1);
-    std::uniform_int_distribution<> col(0, grid_->cols - 1);
-    do {
-      start_pos = {row(gen), col(gen)};
-    } while (grid_->grid.at(start_pos.first).at(start_pos.second) == 1);
-    do {
-      goal_pos = {row(gen), col(gen)};
-    } while (grid_->grid.at(goal_pos.first).at(goal_pos.second) == 1);
   }
 
   int manhattan_distance(std::pair<int, int> a, std::pair<int, int> b)
@@ -44,10 +37,10 @@ public:
                      std::pow(a.second - b.second, 2));
   }
 
-  void run(heuristic strat)
+  Grid &run(heuristic strat)
   {
     std::cout << "Running A*" << std::endl;
-    Grid distances(grid_->rows, grid_->cols, std::numeric_limits<int>::max());
+    Grid distances(grid_.rows, grid_.cols, std::numeric_limits<int>::max());
     distances.grid.at(start_pos.first).at(start_pos.second) = 0;
 
     // priority queue is max-heap by default, which means it tries to extract
@@ -84,12 +77,12 @@ public:
         std::cout << "Shortest path distance: " << current.f << std::endl;
         std::pair<int, int> current = goal_pos;
         while (map.find(current) != map.end()) {
-          grid_->grid.at(current.first).at(current.second) = 2;
+          grid_.grid.at(current.first).at(current.second) = 2;
           current = map[current];
         }
-        grid_->grid.at(start_pos.first).at(start_pos.second) = 3;
-        grid_->grid.at(goal_pos.first).at(goal_pos.second) = 4;
-        return;
+        grid_.grid.at(start_pos.first).at(start_pos.second) = 3;
+        grid_.grid.at(goal_pos.first).at(goal_pos.second) = 4;
+        return grid_;
       }
 
       int row = current.coord.first;
@@ -99,9 +92,9 @@ public:
       for (const auto &dir : directions) {
         std::pair<int, int> neighbor = {row + dir.first, col + dir.second};
         // bounds checking, and also check if the neighbor is not a wall
-        if (neighbor.first >= 0 && neighbor.first < grid_->rows &&
-            neighbor.second >= 0 && neighbor.second < grid_->cols &&
-            grid_->grid.at(neighbor.first).at(neighbor.second) == 0) {
+        if (neighbor.first >= 0 && neighbor.first < grid_.rows &&
+            neighbor.second >= 0 && neighbor.second < grid_.cols &&
+            grid_.grid.at(neighbor.first).at(neighbor.second) == 0) {
           int g = current.g + 1;
           int h;
           if (strat == heuristic::MANHATTAN) {
@@ -120,8 +113,9 @@ public:
     }
 
     std::cout << "No path found from start to goal" << std::endl;
-    grid_->grid.at(start_pos.first).at(start_pos.second) = 3;
-    grid_->grid.at(goal_pos.first).at(goal_pos.second) = 4;
+    grid_.grid.at(start_pos.first).at(start_pos.second) = 3;
+    grid_.grid.at(goal_pos.first).at(goal_pos.second) = 4;
+    return grid_;
   }
 
 private:
@@ -129,5 +123,5 @@ private:
   std::pair<int, int> goal_pos;
   std::random_device rd;
   std::mt19937 gen;
-  std::shared_ptr<Grid> grid_;
+  Grid grid_;
 };

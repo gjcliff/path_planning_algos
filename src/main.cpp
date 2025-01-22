@@ -43,27 +43,26 @@ int main(int argc, char *argv[])
     h = std::stoi(argv[3]);
   }
 
-  std::shared_ptr<Grid> grid = std::make_shared<Grid>(w, h);
-  grid->initialize();
+  Grid grid = Grid(w, h);
+  // std::pair<int,int> start_pos;
+  // std::pair<int,int> goal_pos;
+  auto [start_pos, goal_pos] = grid.initialize();
 
-  Dijkstra dijkstra(grid);
-  dijkstra.run();
-  grid->print();
+  Dijkstra dijkstra(grid, start_pos, goal_pos);
+  Grid dijkstra_grid = dijkstra.run();
+  dijkstra_grid.print();
 
-  grid->reset();
-  A_Star a_star(grid);
-  a_star.run(algo == "manhattan" ? heuristic::MANHATTAN : heuristic::EUCLIDEAN);
-  grid->print();
+  A_Star a_star(grid, start_pos, goal_pos);
+  Grid a_star_grid = a_star.run(algo == "manhattan" ? heuristic::MANHATTAN : heuristic::EUCLIDEAN);
+  a_star_grid.print();
 
-  grid->reset();
-  Breadth_First breadth_first(grid);
-  breadth_first.run();
-  grid->print();
+  Breadth_First breadth_first(grid, start_pos, goal_pos);
+  Grid breadth_first_grid = breadth_first.run();
+  breadth_first_grid.print();
 
-  grid->reset();
-  Depth_First depth_first(grid);
-  depth_first.run();
-  grid->print();
+  Depth_First depth_first(grid, start_pos, goal_pos);
+  Grid depth_first_grid = depth_first.run();
+  depth_first_grid.print();
 
   return 0;
 }

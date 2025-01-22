@@ -34,7 +34,7 @@ public:
   }
 
   // \brief Use Prim's algorithm to initialize the maze
-  void initialize()
+  std::pair<std::pair<int, int>, std::pair<int, int>> initialize()
   {
     std::unordered_set<std::pair<int, int>, pairhash> visited;
     std::random_device rd;
@@ -94,6 +94,16 @@ public:
       grid.at(current.first).at(current.second) = 1;
       grid.at(diff.first).at(diff.second) = 1;
     } while (!frontiers.empty());
+
+    std::uniform_int_distribution<> row(0, rows - 1);
+    std::uniform_int_distribution<> col(0, cols - 1);
+    do {
+      start_pos = {row(gen), col(gen)};
+    } while (grid.at(start_pos.first).at(start_pos.second) == 1);
+    do {
+      goal_pos = {row(gen), col(gen)};
+    } while (grid.at(goal_pos.first).at(goal_pos.second) == 1);
+    return {start_pos, goal_pos};
   }
 
   int manhattan_distance(std::pair<int, int> first, std::pair<int, int> second)

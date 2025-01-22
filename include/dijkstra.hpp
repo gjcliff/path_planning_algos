@@ -17,23 +17,16 @@ struct Dijkstra_Node {
 
 class Dijkstra {
 public:
-  Dijkstra(std::shared_ptr<Grid> grid) : gen(rd()), grid_(grid)
+  Dijkstra(Grid &grid, std::pair<int, int> start_pos,
+           std::pair<int, int> goal_pos)
+    : gen(rd()), grid_(grid), start_pos(start_pos), goal_pos(goal_pos)
   {
-    std::uniform_int_distribution<> row(0, grid_->rows - 1);
-    std::uniform_int_distribution<> col(0, grid_->cols - 1);
-    do {
-      start_pos = {row(gen), col(gen)};
-    } while (grid_->grid.at(start_pos.first).at(start_pos.second) == 1);
-    do {
-      goal_pos = {row(gen), col(gen)};
-    } while (grid_->grid.at(goal_pos.first).at(goal_pos.second) == 1 ||
-             goal_pos == start_pos);
   }
 
-  void run()
+  Grid &run()
   {
     std::cout << "Running Dijkstra's Algorithm" << std::endl;
-    Grid distances(grid_->rows, grid_->cols, std::numeric_limits<int>::max());
+    Grid distances(grid_.rows, grid_.cols, std::numeric_limits<int>::max());
     distances.grid.at(start_pos.first).at(start_pos.second) = 0;
 
     // priority queue is max-heap by default, which means it tries to extract
@@ -62,12 +55,12 @@ public:
         std::cout << "Shortest path distance: " << current.dist << std::endl;
         std::pair<int, int> current = goal_pos;
         while (map.find(current) != map.end()) {
-          grid_->grid.at(current.first).at(current.second) = 2;
+          grid_.grid.at(current.first).at(current.second) = 2;
           current = map[current];
         }
-        grid_->grid.at(start_pos.first).at(start_pos.second) = 3;
-        grid_->grid.at(goal_pos.first).at(goal_pos.second) = 4;
-        return;
+        grid_.grid.at(start_pos.first).at(start_pos.second) = 3;
+        grid_.grid.at(goal_pos.first).at(goal_pos.second) = 4;
+        return grid_;
       }
 
       int row = current.coord.first;
@@ -77,9 +70,9 @@ public:
       for (const auto &dir : directions) {
         std::pair<int, int> neighbor = {row + dir.first, col + dir.second};
         // bounds checking, and also check if the neighbor is not a wall
-        if (neighbor.first >= 0 && neighbor.first < grid_->rows &&
-            neighbor.second >= 0 && neighbor.second < grid_->cols &&
-            grid_->grid.at(neighbor.first).at(neighbor.second) == 0) {
+        if (neighbor.first >= 0 && neighbor.first < grid_.rows &&
+            neighbor.second >= 0 && neighbor.second < grid_.cols &&
+            grid_.grid.at(neighbor.first).at(neighbor.second) == 0) {
           int new_dist = current.dist + 1;
 
           if (new_dist <
@@ -93,8 +86,9 @@ public:
     }
 
     std::cout << "No path found from start to goal" << std::endl;
-    grid_->grid.at(start_pos.first).at(start_pos.second) = 3;
-    grid_->grid.at(goal_pos.first).at(goal_pos.second) = 4;
+    grid_.grid.at(start_pos.first).at(start_pos.second) = 3;
+    grid_.grid.at(goal_pos.first).at(goal_pos.second) = 4;
+    return grid_;
   }
 
 private:
@@ -102,5 +96,5 @@ private:
   std::pair<int, int> goal_pos;
   std::random_device rd;
   std::mt19937 gen;
-  std::shared_ptr<Grid> grid_;
+  Grid grid_;
 };
