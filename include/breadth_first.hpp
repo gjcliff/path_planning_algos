@@ -10,9 +10,15 @@ public:
   template <typename T, typename U>
   std::size_t operator()(const std::pair<T, U> &x) const
   {
-    return std::hash<T>()(x.first) ^ std::hash<U>()(x);
+    return std::hash<T>()(x.first) ^ std::hash<U>()(x.second);
   }
 };
+
+// struct practice {
+//   public:
+//     template <typename T, typename U>
+//       std::size_t operator()(const std::pair<T,U> &x)
+// }
 
 struct Node {
   Node(int dist, std::shared_ptr<Node> prev) : dist(dist), prev(prev) {}
