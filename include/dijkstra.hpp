@@ -5,6 +5,7 @@
 #include <memory>
 #include <queue>
 #include <random>
+#include <unordered_map>
 
 struct Node {
   Node(int dist, std::pair<int, int> coord) : dist(dist), coord(coord) {}
@@ -44,12 +45,21 @@ public:
     std::vector<std::pair<int, int>> directions{
       {0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
+    std::unordered_map<std::pair<int, int>, std::pair<int, int>, pairhash> map;
+
     while (!queue.empty()) {
       struct Node current =
         queue.top(); // grab the first element from the queue
       queue.pop();   // remove the first element from the queue
       if (current.coord == goal_pos) {
         std::cout << "Shortest path distance: " << current.dist << std::endl;
+        std::pair<int, int> current = goal_pos;
+        while (map.find(current) != map.end()) {
+          grid_->grid.at(current.first).at(current.second) = 2;
+          current = map[current];
+        }
+        grid_->grid.at(start_pos.first).at(start_pos.second) = 3;
+        grid_->grid.at(goal_pos.first).at(goal_pos.second) = 4;
         return;
       }
 
@@ -69,11 +79,15 @@ public:
               distances.grid.at(neighbor.first).at(neighbor.second)) {
             distances.grid.at(neighbor.first).at(neighbor.second) = new_dist;
             queue.push({new_dist, neighbor});
+            map[neighbor] = current.coord;
           }
         }
       }
     }
+
     std::cout << "No path found from start to goal" << std::endl;
+    grid_->grid.at(start_pos.first).at(start_pos.second) = 3;
+    grid_->grid.at(goal_pos.first).at(goal_pos.second) = 4;
   }
 
 private:

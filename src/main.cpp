@@ -13,12 +13,12 @@ int main(int argc, char *argv[]) {
     h = std::stoi(argv[2]);
   }
 
-  Grid grid(w, h);
-  grid.initialize();
-  grid.print();
+  std::shared_ptr<Grid> grid = std::make_shared<Grid>(w, h);
+  grid->initialize();
 
-  Dijkstra dijkstra(std::make_shared<Grid>(grid));
+  Dijkstra dijkstra(grid);
   dijkstra.run();
+  grid->print();
 
   return 0;
 }

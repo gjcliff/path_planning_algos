@@ -20,6 +20,8 @@ class Grid {
 public:
   int rows, cols;
   std::vector<std::vector<int>> grid;
+  std::pair<int, int> start_pos;
+  std::pair<int, int> goal_pos;
 
   Grid(int rows, int cols) : rows(rows), cols(cols)
   {
@@ -50,7 +52,7 @@ public:
     std::vector<std::pair<int, int>> directions{
       {0, 2}, {2, 0}, {0, -2}, {-2, 0}};
 
-    // do while loop so that it always runs at least once
+    // needs to always run at least once
     do {
       for (const auto &dir : directions) {
         std::pair<int, int> candidate(current.first + dir.first,
@@ -107,9 +109,20 @@ public:
       for (int col = 0; col < cols; col++) {
         int current = grid.at(row).at(col);
         if (current == 1) {
+          // walls
           std::cout << " \033[31m" << grid.at(row).at(col) << "\033[0m";
+        } else if (current == 2) {
+          // path traveled
+          std::cout << " \033[33m" << grid.at(row).at(col) << "\033[0m";
+        } else if (current == 3) {
+          // start
+          std::cout << " \033[32m" << grid.at(row).at(col) << "\033[1m";
+        } else if (current == 4) {
+          // goal
+          std::cout << " \033[32m" << grid.at(row).at(col) << "\033[1m";
         } else {
-          std::cout << " \033[32m" << grid.at(row).at(col) << "\033[0m";
+          // free space
+          std::cout << " \033[37m" << grid.at(row).at(col) << "\033[0m";
         }
       }
       std::cout << std::endl;
